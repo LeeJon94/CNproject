@@ -21,3 +21,10 @@ class IPPacket:
         self.ttl         = ttl
         self.protocol    = protocol
         self.payload     = payload
+
+class EthernetFrame:
+    def __init__(self, src_mac, dst_mac, frame_type, payload):
+        self.src_mac = src_mac
+        self.dst_mac = dst_mac
+        self.frame_type = frame_type
+        self.payload = payload
