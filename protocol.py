@@ -1,3 +1,7 @@
+# JO ALMERO / 24849627
+# THIS FILE CONTAINS THE ETHERNETFRAME, IPPACKET AND UDPSEGMENT
+# IT ALSO CONTAINS THE COMPUTERCHECKSUM AND VERIFYCHECKSUM FUNCTION
+
 class UDPSegment:
     def __init__(self, src_port, dst_port, data, segment_type, seq_num):
         self.src_port = src_port
