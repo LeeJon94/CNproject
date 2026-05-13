@@ -7,4 +7,6 @@ class UDPSegment:
         self.seq_num = seq_num
         self.checksum = checksum
         self.length = length
-        pass
+
+    def computeChecksum(data):
+        return sum(data.encode()) % 256
