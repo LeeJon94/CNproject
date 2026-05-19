@@ -51,3 +51,10 @@ class Host:
         print(f"{self.name}: Layer 2: Frame created: SRC_MAC={self.mac}, DST_MAC={dst_mac}")
         print(f"{self.name}: Layer 2: Frame sent")
         router.receive_frame(frame, "Interface 1")
+
+    def receive_packet(self, packet):
+        print(f"{self.name}: Layer 3: Packet received from Data Link layer: SRC_IP={packet.src_ip}, DST_IP={packet.dst_ip}, TTL+{packet.ttl}")
+        print(f"{self.name}: Layer 3: Destination IP read: {packet.dst_ip}")
+        print(f"{self.name}: Layer 3: Packet identified as local delivery")
+        print(f"{self.name}: Layer 3: Segment delivered to Transport Layer")
+        self.receive_segment(packet.payload)
