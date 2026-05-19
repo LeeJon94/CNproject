@@ -79,3 +79,52 @@ class Host:
         elif segment.segment_type == 1:  # ACK
             print(f"{self.name}: Layer 4: ACK received: seq={segment.seq_num}")
             self.last_ack = segment
+
+    class Router:
+
+        def __init__(self, name, routing_table, arp_table, interfaces):
+            self.name          = name
+            self.routing_table = routing_table
+            self.arp_table     = arp_table
+            self.interfaces    = interfaces  # e.g. {"Interface 1": "BB:BB:BB:BB:BB:BB", "Interface 2": "CC:CC:CC:CC:CC:CC"}
+            self.mac_table     = {}          # learned MAC addresses
+            self.hosts         = {}          # e.g. {"Interface 1": host_a, "Interface 2": host_b}
+
+        def receive_frame(self, frame, interface):
+            # Layer 2
+            src_mac = frame.src_mac
+            self.mac_table[src_mac] = interface
+            print(f"{self.name}: Layer 2: Frame received on {interface}")
+            print(f"{self.name}: Layer 2: Source MAC learned: {src_mac} on {interface}")
+            print(f"{self.name}: Layer 2: Packet delivered to Network Layer")
+            self.forward_packet(frame.payload)
+
+        def forward_packet(self, packet):
+            # Layer 3
+            print(f"{self.name}: Layer 3: Packet received from Data Link Layer: SRC_IP={packet.src_ip}, DST_IP={packet.dst_ip}, TTL={packet.ttl}")
+            print(f"{self.name}: Layer 3: Destination IP read: {packet.dst_ip}")
+            packet.ttl -= 1
+            if packet.ttl == 0:
+                print(f"{self.name}: Layer 3: TTL expired, packet dropped")
+                return
+            print(f"{self.name}: Layer 3: TTL decremented: {packet.ttl + 1} → {packet.ttl}")
+            route    = self.routing_table[packet.dst_ip]
+            next_hop = route["next_hop"]
+            out_interface = route["interface"]
+            print(f"{self.name}: Layer 3: Routing table lookup performed")
+            print(f"{self.name}: Layer 3: Next-hop IP determined: {next_hop}")
+            print(f"{self.name}: Layer 3: Outgoing interface selected ({out_interface})")
+            print(f"{self.name}: Layer 3: Packet forwarded to Data Link Layer")
+            self.send_frame(packet, next_hop, out_interface)
+
+        def send_frame(self, packet, next_hop, out_interface):
+            # Layer 2
+            dst_mac = self.arp_table[next_hop]
+            src_mac = self.interfaces[out_interface]
+            frame   = EthernetFrame(src_mac, dst_mac, IPV4_TYPE, packet)
+            print(f"{self.name}: Layer 2: Packet received from Network Layer")
+            print(f"{self.name}: Layer 2: Destination MAC lookup for next-hop IP ({next_hop}) → {dst_mac}")
+            print(f"{self.name}: Layer 2: Frame created: SRC_MAC={src_mac}, DST_MAC={dst_mac}")
+            print(f"{self.name}: Layer 2: Frame forwarded on {out_interface}")
+            destination = self.hosts[out_interface]
+            destination.receive_frame(frame)
