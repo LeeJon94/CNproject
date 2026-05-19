@@ -58,3 +58,24 @@ class Host:
         print(f"{self.name}: Layer 3: Packet identified as local delivery")
         print(f"{self.name}: Layer 3: Segment delivered to Transport Layer")
         self.receive_segment(packet.payload)
+
+    def receive_segment(self, segment, dst_ip=None, router=None):
+        print(f"{self.name}: Layer 4: Segment received from Network Layer")
+        if not segment.verify_checksum():
+            print(f"{self.name}: Layer 4: Checksum error, segment discarded")
+            if self.last_ack:
+                router.receive_frame(self.last_ack, "Interface")
+            return
+        print(f"{self.name}: Layer 4: Checksum verified")
+
+        if segment.segment_type == 0:  # DATA
+            print(f"{self.name}: Layer 4: DATA segment delivered to Application Layer. Data size={len(segment.data)}")
+            ack = UDPSegment(DST_PORT, SRC_PORT, "", 1, segment.seq_num)
+            self.last_ack = ack
+            print(f"{self.name}: Layer 4: Segment created by adding transport layer header (ACK, seq={segment.seq_num})")
+            print(f"{self.name}: Layer 4: Segment sent to Network Layer")
+            self.send_packet(ack, dst_ip, router)
+
+        elif segment.segment_type == 1:  # ACK
+            print(f"{self.name}: Layer 4: ACK received: seq={segment.seq_num}")
+            self.last_ack = segment
