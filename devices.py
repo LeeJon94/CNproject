@@ -43,4 +43,11 @@ class Host:
         print(f"{self.name}: Layer 3: Packet forwarded to Data Link Layer")
         self.send_frame(packet, next_hop, router)
 
-    
+    def send_frame(self, packet, next_hop, router):
+        dst_mac = self.arp_table[next_hop]
+        frame = EthernetFrame(self.mac, dst_mac, IPV4_TYPE, packet)
+        print(f"{self.name}: Layer 2: Packet received from Network Layer")
+        print(f"{self.name}: Layer 2: Destination MAC lookup for next-hop IP ({next_hop}) → {dst_mac}")
+        print(f"{self.name}: Layer 2: Frame created: SRC_MAC={self.mac}, DST_MAC={dst_mac}")
+        print(f"{self.name}: Layer 2: Frame sent")
+        router.receive_frame(frame, "Interface 1")
