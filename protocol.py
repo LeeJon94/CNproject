@@ -2,6 +2,11 @@
 # THIS FILE CONTAINS THE ETHERNETFRAME, IPPACKET AND UDPSEGMENT
 # IT ALSO CONTAINS THE COMPUTERCHECKSUM AND VERIFYCHECKSUM FUNCTION
 
+from config import(
+    ETHER_TYPE_IPV4, IP_PROTO_UDP, UDP_HEADER_SIZE, IP_HEADER_SIZE,
+    DATA, ACK
+)
+
 class UDPSegment:
     HEADER_SIZE = 10  #bytes: src_port(2) + dst_port(2) + length(2) + checksum(2) + segment_type(1) + seq_num(1)
     def __init__(self, src_port, dst_port, data, segment_type, seq_num):
@@ -20,11 +25,11 @@ class UDPSegment:
         return total%65536 #checksum is 2 bytes per spec
     
     def verifyChecksum(self):
-        return self.computeChecksum() == self.checksum
+        return self.computeChecksum()==self.checksum
     
     def __repr__(self):
-        type_str = "DATA" if self.segment_type == DATA else "ACK"
-        return (f"UDPSegment(type={type_str}, seq={self.seq_num}, "
+        typeStr="DATA" if self.segment_type == DATA else "ACK"
+        return (f"UDPSegment(type={typeStr}, seq={self.seq_num}, "
                 f"src_port={self.src_port}, dst_port={self.dst_port}, "
                 f"length={self.length}, data_len={len(self.data)})")
     
